@@ -12,14 +12,32 @@ import plotly.graph_objs as go
 
 ######################################################   Data   ##############################################################
 
-#path = 'https://raw.githubusercontent.com/nalpalhao/DV_Practival/master/datasets/'
+# path = 'https://raw.githubusercontent.com/nalpalhao/DV_Practival/master/datasets/'
 
-df = pd.read_csv("C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Project Dashboard/CSVs/Deaths_state_based_conflicts!!.csv")
+df = pd.read_csv(
+    "C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Github/CSVs/types_of_conflits.csv")
+
+df.drop(columns=['Code'], inplace=True)
+
+df.rename(columns={'Entity': 'world_region',
+                   'Year': 'year',
+                   'Number of civil conflicts with foreign state intervention': 'civil-foreign conflits',
+                   'Number of civil conflicts': 'civil conflicts',
+                   'Number of conflicts between states': 'between states conflicts',
+                   'Number of colonial or imperial conflicts': 'colonial/imperial conflicts'}, inplace=True)
+
+df['world_region'] = df['world_region'].astype('string')
+
+df['total number of conflicts'] = df['civil-foreign conflicts'] + df['civil conflicts'] + df[
+    'between states conflicts'] + df['colonial/imperial conflicts']
+
+df2 = df.loc[df['world_region'] != 'World']
+df2 = df2.loc[df['year'] > 2000]  # !!!!!!!!
 
 ######################################################  Interactive Components  ############################################
 
 world_regions = [dict(label=region, value=region) for region in df['Entity'].unique()]
-#print(world_regions)
+# print(world_regions)
 
 deaths_col = 'Deaths in all state-based conflict types'
 years = [dict(label=year, value=year) for year in df['Year'].unique()]
