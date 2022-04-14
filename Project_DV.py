@@ -10,40 +10,37 @@ import plotly.graph_objs as go
 
 # https://htmlcheatsheet.com/css/ --> get new css classes
 
-######################################################   Data   ##############################################################
+#########################################
+# Dataset types of conflicts
+df_conflicts = pd.read_csv(  # Change this to the path of your computer
+    "C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Github/CSVs/types_of_conflicts.csv")
 
-# path = 'https://raw.githubusercontent.com/nalpalhao/DV_Practival/master/datasets/'
+df_conflicts.drop(columns=['Code'], inplace=True)  # drop the column 'Code' --> not necessary for our analysis
 
-df = pd.read_csv("C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Github/CSVs/types_of_conflicts.csv")
+df_conflicts.rename(columns={'Entity': 'world_region',
+                             'Year': 'year',
+                             'Number of civil conflicts with foreign state intervention': 'civil-foreign conflicts',
+                             'Number of civil conflicts': 'civil conflicts',
+                             'Number of conflicts between states': 'between states conflicts',
+                             'Number of colonial or imperial conflicts': 'colonial/imperial conflicts'}, inplace=True)
 
-df.drop(columns=['Code'], inplace=True)
+df_conflicts['world_region'] = df_conflicts['world_region'].astype('string')
 
-df.rename(columns={'Entity': 'world_region',
-                   'Year': 'year',
-                   'Number of civil conflicts with foreign state intervention': 'civil-foreign conflicts',
-                   'Number of civil conflicts': 'civil conflicts',
-                   'Number of conflicts between states': 'between states conflicts',
-                   'Number of colonial or imperial conflicts': 'colonial/imperial conflicts'}, inplace=True)
+df_conflicts['total number of conflicts'] = df_conflicts['civil-foreign conflicts'] + df_conflicts['civil conflicts'] + \
+                                            df_conflicts['between states conflicts'] + df_conflicts[
+                                                'colonial/imperial conflicts']
 
-df['world_region'] = df['world_region'].astype('string')
-
-df['total number of conflicts'] = df['civil-foreign conflicts'] + df['civil conflicts'] + df[
-    'between states conflicts'] + df['colonial/imperial conflicts']
-
-###############################################
-df1 = df.drop(['civil-foreign conflicts', 'civil conflicts', 'between states conflicts', 'colonial/imperial conflicts'],
-              axis=1)
-df1.set_index('world_region', inplace=True)
-df1 = pd.pivot_table(df1, values='total number of conflicts', index='world_region', columns='year')
-df1.drop('World', axis=0, inplace=True)
 colors = ['#B6E880', '#FF97FF', '#FECB52', '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692']
 
 #############################################
-df2 = df.loc[df['world_region'] != 'World']
-df2 = df2.loc[df['year'] > 2000]  # !!!!!!!!
+# Dataset for bar chart
+# df_conflicts2 = df_conflicts.loc[df_conflicts['world_region'] != 'World']
+# df_conflicts2 = df_conflicts.loc[df_conflicts['year'] > 2000]  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #############################################
-df_deaths = pd.read_csv("C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Github/CSVs/deaths-from-conflict-and-terrorism.csv")
+# Dataset for world deaths
+df_deaths = pd.read_csv(
+    "C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Github/CSVs/deaths-from-conflict-and-terrorism.csv")
 df_deaths.drop(columns=['Code'], inplace=True)
 df_deaths.rename(columns={'Entity': 'Country',
                           'Year': 'year',
@@ -52,17 +49,15 @@ df_deaths.rename(columns={'Entity': 'Country',
 
 df_deaths['Country'] = df_deaths['Country'].astype('string')
 
-######################################################  Interactive Components  ############################################
-
-world_regions = [dict(label=region, value=region) for region in df2['world_region'].unique()]
+#######################################
+# Interactive Components
+drop_regions = df_conflicts.loc[df_conflicts['world_region'] != 'World']
+world_regions = [dict(label=region, value=region) for region in drop_regions['world_region'].unique()]
 # print(world_regions)
 
 list_of_conflicts = ['civil-foreign conflicts', 'civil conflicts', 'between states conflicts',
                      'colonial/imperial conflicts']
 types_of_conflicts = [dict(label=conflict, value=conflict) for conflict in list_of_conflicts]
-
-# deaths_col = 'Deaths in all state-based conflict types'
-# years = [dict(label=year, value=year) for year in df['Year'].unique()]
 
 dropdown_world_regions = dcc.Dropdown(
     id='world_regions_drop',
@@ -79,7 +74,7 @@ dropdown_types_of_conflicts = dcc.Dropdown(
 )
 
 range_slider = dcc.RangeSlider(  # create a slider for the years
-    id='year_slider',
+    id='range_slider',
     min=1950,
     max=2020,
     value=[1960, 2010],
@@ -94,74 +89,153 @@ range_slider = dcc.RangeSlider(  # create a slider for the years
     step=1
 )
 
+radio_lin_log = dcc.RadioItems(
+    id='lin_log',
+    options=[dict(label='Linear', value=0), dict(label='log', value=1)],
+    value=0
+)
+
+radio_projection = dcc.RadioItems(
+    id='projection',
+    options=[dict(label='Equirectangular', value=0),
+             dict(label='Orthographic', value=1)],
+    value=0
+)
+
+normal_slider = dcc.Slider(
+    id='normal_slider',
+    min=df_deaths['year'].min(),
+    max=df_deaths['year'].max(),
+    marks={str(i): '{}'.format(str(i)) for i in
+           [1990, 1995, 2000, 2005, 2010, 2014]},
+    value=df_deaths['year'].min(),
+    step=1
+)
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# slider_map = daq.Slider(
+#         id = 'slider_map',
+#         handleLabel={"showCurrentValue": True,"label": "Year"},
+#         marks = {str(i):str(i) for i in [1990,1995,2000,2005,2010,2015]},
+#         min = 1990,
+#         size=450,
+#         color='#4B9072'
+#     )
+
 ##################################################
 # APP
 app = dash.Dash(__name__)
 
 server = app.server
 
-# !!!!!!!!!!!!!!   LAYOUT   !!!!!!!!!!!!!!
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!  LAYOUT   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 app.layout = html.Div([
 
-    html.Div([  # title !!
-        html.H1('Deaths in state-based conflicts'),
-    ], className="box_pretty"),
+    html.Div([  # left bar with title, text. image, and references (fixed)
+        html.H1('WAR AND PEACE'),
+        html.Br(),
+        html.Label('Text......................'),
+        html.Br(),
+        # html.Img()
+        html.Br(),
+        html.Label('Work done by......................'),
 
-    html.Div([  # gráfico de linhas (esquerda) e gráfico de barras (direita)
-        html.Div([
-            html.Div([
-                html.Label('Country Choice'),
-                dropdown_world_regions,  ##############
-            ], style={'width': '85%', 'padding-left': '40px'}),
-            dcc.Graph(id='line_chart', className="box_pretty"),
+    ], className='side_bar'),
 
-        ], style={'width': '60%', 'height': '500px'}),
+    html.Div([  # right part of the dashboard, with all the visualizations and filters
 
-        html.Div([
-            html.Div([
-                html.Label('Type of Conflict Choice'),
-                dropdown_types_of_conflicts,  ##############
-            ], style={'width': '55%', 'padding-left': '40px'}),
-            html.Div([
-                dcc.Graph(id='bar_chart', className="box_pretty"),
-            ], style={'width': '100%'}),
-            # html.Label('Year Slider'),
-            # slider_year,  ##############
-        ], style={'width': '45%', 'height': '500px'}),
+        # Divide horizontally in 4 parts
+        ##############################################################
+        html.Div([  # create a box in the assets, for the filters !!
+            html.Div([  # first part --> dropdown menus (10%)
 
-    ], style={'display': 'flex', "height": '600px'}),
+                html.Div([  # Instructions for the filters
+                    html.Br(),
+                    html.Label('Choose the world regions you want to examine and also the type of conflict'),
+                ], style={'width': '250px', 'padding-left': '20px'}),
 
-    html.Div([
-        range_slider,
-        html.Br()
-    ], style={'width': '80%', 'padding-left': '100px', 'padding-bottom': '10px'}),
-    html.Div([
-        dcc.Graph(id='world_map', className="box_pretty"),
-    ], style={'width': '80%', 'padding-left': '100px', 'padding-bottom': '10px'}),
+                html.Div([  # dropdown Country Choice
+                    html.Br(),
+                    html.Label('World Region Choice'),
+                    dropdown_world_regions,
+                ], style={'width': '45%', 'padding-left': '20px'}),
 
+                html.Div([  # dropdown type of conflict
+                    html.Br(),
+                    html.Label('Type of Conflict Choice'),
+                    dropdown_types_of_conflicts,
+                ], style={'width': '20%', 'padding-left': '20px'}),
+
+            ], style={'display': 'flex', 'height': '10%', 'padding-left': '200px'}),
+
+            ##############################################################
+            html.Div([  # second part --> range slider (10%)
+                html.Br(),
+                html.Br(),
+                range_slider,
+            ], style={'height': '10%', 'width': '75%', 'padding-left': '250px'}),  # , 'padding-bottom': '10px'}),
+
+        ]),  # className='box'),
+
+        ####################################################################
+        html.Div([  # third part --> line chart and bar chart
+
+            html.Div([  # line chart on the left
+                html.Br(),
+                html.Br(),
+                dcc.Graph(id='line_chart', className="box"),
+            ], style={'width': '55%'}),
+
+            html.Div([  # line chart on the left
+                html.Br(),
+                html.Br(),
+                dcc.Graph(id='bar_chart', className="box"),
+            ], style={'width': '45%'}),
+
+        ], style={'display': 'flex', 'height': '40%', 'padding-left': '195px'}),
+
+
+        ####################################################################
+        html.Div([  # fourth part --> world map and top_countries graph
+
+            html.Div([  # line chart on the left
+                radio_projection,
+                dcc.Graph(id='world_map'),
+                normal_slider,
+            ], className="box", style={'width': '65%', 'padding-left': '20px'}),
+
+            html.Div([  # line chart on the left
+                dcc.Graph(id='top_countries_graph', className="box"),
+            ], style={'width': '35%'}),
+
+        ], style={'display': 'flex', 'height': '35%', 'padding-left': '195px'}),
+
+    ]),
 ])
 
 
-###################################   Callbacks   ##########################################
+##############################
+# First Callback
 @app.callback(
     [
         Output("line_chart", "figure"),
         Output("bar_chart", "figure"),
-        Output("world_map", "figure"),
     ],
     [
         Input("world_regions_drop", "value"),
-        Input("year_slider", "value"),
+        Input("range_slider", "value"),
         Input('types_of_conflicts_drop', 'value')
     ]
 )
 # first the inputs, then the states, by order
 def plots(region, years, conflict):
     ########################################################################################
-    # First Visualization: Line Chart
-    filter_df = df[(df['year'] >= years[0]) & (df['year'] <= years[1])]
+    # Filter the dataset based on the range slider
+    filter_df = df_conflicts[(df_conflicts['year'] >= years[0]) & (df_conflicts['year'] <= years[1])]
     filter_df = filter_df.loc[filter_df['world_region'] != 'World']
 
+    ########################################################################################
+    # First Visualization: Line Chart
     df_line_graph = filter_df[['world_region', 'year', 'total number of conflicts']].set_index('world_region')
     df_line_graph = pd.pivot_table(df_line_graph, values='total number of conflicts', index='world_region',
                                    columns='year')
@@ -174,27 +248,27 @@ def plots(region, years, conflict):
                                  y=df_line_graph.loc[world_region],
                                  name=world_region,
                                  line=dict(color=colors[i]),
-                                 showlegend=True
+                                 # font-size='10px', ????????
                                  )
                             )
 
-    layout_scatter = dict(title=dict(text='Conflicts over the years', x=0.5),
+    layout_scatter = dict(title=dict(text='Total number of conflicts over the years', x=0.5),
                           xaxis=dict(title='Years'),
                           yaxis=dict(title='Total Number of Conflicts'))
 
     ########################################################################################
     # Second Visualization: Bar Charts
     conflicts_string = "".join(conflict)
-    conflict_df = filter_df.loc[filter_df['world_region'].isin(region)]
-    conflict_df = pd.pivot_table(conflict_df[['world_region', 'year', conflicts_string]],
-                                 values=conflicts_string, index=['world_region'], columns=['year'])
+    df_bar_graph = filter_df.loc[filter_df['world_region'].isin(region)]
+    df_bar_graph = pd.pivot_table(df_bar_graph[['world_region', 'year', conflicts_string]],
+                                  values=conflicts_string, index=['world_region'], columns=['year'])
 
     fig_bar_data = []
     # Each year defines a new hidden (implies visible=False) trace in our visualization
-    for year in conflict_df.columns:  # year is an integer number
+    for year in df_bar_graph.columns:  # year is an integer number
         fig_bar_data.append(dict(data=dict(type='bar',
-                                           x=conflict_df.index,  # world regions
-                                           y=conflict_df[year],  # values for that year
+                                           x=df_bar_graph.index,  # world regions
+                                           y=df_bar_graph[year],  # values for that year
                                            name=year,
                                            marker=dict(color='orange'),
                                            showlegend=False
@@ -205,7 +279,7 @@ def plots(region, years, conflict):
 
     fig_bar_layout = dict(
         title=dict(text=f'Total Number of {conflicts_string} between {str(years[0])} and {str(years[1])}'),
-        yaxis=dict(title='Number of Conflicts', range=[0, 10]),
+        yaxis=dict(title='Number of Conflicts', range=[0, 10]),  # change the range !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         # PLAT BUTTON TO SEE CHANGES THROUGHOUT THE YEARS
         updatemenus=[dict(type="buttons",
                           buttons=[dict(label="Play",
@@ -214,24 +288,44 @@ def plots(region, years, conflict):
                                    dict(label='Pause',
                                         method="animate",
                                         args=[[None], dict(frame=dict(duration=0, redraw=False),
+                                                           # pause button to stop and continue !!!!!!!
                                                            mode="immediate",
                                                            transition=dict(duration=0))])
                                    ],
-                          direction='left',
-                          x=0.6,
+                          direction='left',  # put both of the buttons side by side
+                          x=0.6,  # change position of the buttons
                           y=-0.1)])
 
     initial_data = dict(type='bar',
-                        x=conflict_df.index,
-                        y=conflict_df[2000],
+                        x=df_bar_graph.index,
+                        y=df_bar_graph[2000],  # put the initial data as the year[0] of the range slider
                         marker=dict(color='orange')
                         # name=str(1990)
                         )
 
-    ########################################################################################
+    return go.Figure(data=data_scatter, layout=layout_scatter), \
+           go.Figure(data=initial_data, layout=fig_bar_layout, frames=fig_bar_data)
+
+
+#######################################
+# Second Callback
+@app.callback(
+    # [
+    Output("world_map", "figure"),
+    # Output("top_chart", "figure"),
+    # ],
+    [
+        Input("projection", "value"),
+        Input('normal_slider', 'value')
+    ]
+)
+# first the inputs, then the states, by order
+def plots(projection, year):
+    #######################################################################################
     # Third Visualization: World Map
-    filter_df2 = df_deaths[(df_deaths['year'] >= years[0]) & (df_deaths['year'] <= years[1])]
+    filter_df2 = df_deaths[(df_deaths['year'] <= year)]
     filter_df2 = filter_df2.groupby('Country').sum()[['Total Deaths']]
+
     data_choropleth = dict(type='choropleth',
                            locations=filter_df2.index,
                            # There are three ways to 'merge' your data with the data pre embedded in the map
@@ -242,7 +336,7 @@ def plots(region, years, conflict):
                            )
 
     layout_choropleth = dict(geo=dict(scope='world',  # default
-                                      projection=dict(type='orthographic'),
+                                      projection=dict(type=['equirectangular', 'orthographic'][projection]),
                                       # showland=True,   # default = True
                                       landcolor='black',
                                       lakecolor='white',
@@ -255,9 +349,7 @@ def plots(region, years, conflict):
                                         )
                              )
 
-    return go.Figure(data=data_scatter, layout=layout_scatter), \
-           go.Figure(data=initial_data, layout=fig_bar_layout, frames=fig_bar_data), \
-           go.Figure(data=data_choropleth, layout=layout_choropleth)
+    return go.Figure(data=data_choropleth, layout=layout_choropleth)
 
 
 ############################################################
