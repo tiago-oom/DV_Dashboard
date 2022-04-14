@@ -14,8 +14,7 @@ import plotly.graph_objs as go
 
 # path = 'https://raw.githubusercontent.com/nalpalhao/DV_Practival/master/datasets/'
 
-df = pd.read_csv(
-    "C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Github/CSVs/types_of_conflicts.csv")
+df = pd.read_csv("C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Github/CSVs/types_of_conflicts.csv")
 
 df.drop(columns=['Code'], inplace=True)
 
@@ -44,8 +43,7 @@ df2 = df.loc[df['world_region'] != 'World']
 df2 = df2.loc[df['year'] > 2000]  # !!!!!!!!
 
 #############################################
-df_deaths = pd.read_csv(
-    "C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Github/CSVs/deaths-from-conflict-and-terrorism.csv")
+df_deaths = pd.read_csv("C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Github/CSVs/deaths-from-conflict-and-terrorism.csv")
 df_deaths.drop(columns=['Code'], inplace=True)
 df_deaths.rename(columns={'Entity': 'Country',
                           'Year': 'year',
@@ -53,6 +51,7 @@ df_deaths.rename(columns={'Entity': 'Country',
                  inplace=True)
 
 df_deaths['Country'] = df_deaths['Country'].astype('string')
+
 ######################################################  Interactive Components  ############################################
 
 world_regions = [dict(label=region, value=region) for region in df2['world_region'].unique()]

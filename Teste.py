@@ -142,7 +142,6 @@ fig_bar.show(renderer='iframe')
 
 ###########################
 # World globe layout
-
 data_choropleth = dict(type='choropleth',
                        locations=df_emission_0['country_name'],
                        # There are three ways to 'merge' your data with the data pre embedded in the map
