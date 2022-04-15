@@ -13,7 +13,7 @@ import plotly.graph_objs as go
 #########################################
 # Dataset types of conflicts
 df_conflicts = pd.read_csv(  # Change this to the path of your computer
-    "C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Github/CSVs/types_of_conflicts.csv")
+    r"C:\Users\Administrador\OneDrive - NOVAIMS\Mestrado\Data Visualization\Project\CSVs\types_of_conflicts.csv")
 
 df_conflicts.drop(columns=['Code'], inplace=True)  # drop the column 'Code' --> not necessary for our analysis
 
@@ -30,10 +30,17 @@ df_conflicts['total number of conflicts'] = df_conflicts['civil-foreign conflict
                                             df_conflicts['between states conflicts'] + df_conflicts[
                                                 'colonial/imperial conflicts']
 
+colors = ['#B6E880', '#FF97FF', '#FECB52', '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692']
+
+#############################################
+# Dataset for bar chart
+# df_conflicts2 = df_conflicts.loc[df_conflicts['world_region'] != 'World']
+# df_conflicts2 = df_conflicts.loc[df_conflicts['year'] > 2000]  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 #############################################
 # Dataset for world deaths
 df_deaths = pd.read_csv(
-    "C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Github/CSVs/deaths-from-conflict-and-terrorism.csv")
+    r"C:\Users\Administrador\OneDrive - NOVAIMS\Mestrado\Data Visualization\Project\CSVs\deaths-from-conflict-and-terrorism.csv")
 df_deaths.drop(columns=['Code'], inplace=True)
 df_deaths.rename(columns={'Entity': 'Country',
                           'Year': 'year',
@@ -64,9 +71,6 @@ deaths = df_deaths[~df_deaths.Country.isin(regions)]
 deaths_df = pd.pivot_table(deaths, values='Total Deaths', index='Country', columns='year')
 
 #######################################
-colors = ['#B6E880', '#FF97FF', '#FECB52', '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692']
-
-#######################################
 # Interactive Components
 drop_regions = df_conflicts.loc[df_conflicts['world_region'] != 'World']
 world_regions = [dict(label=region, value=region) for region in drop_regions['world_region'].unique()]
@@ -79,14 +83,14 @@ types_of_conflicts = [dict(label=conflict, value=conflict) for conflict in list_
 dropdown_world_regions = dcc.Dropdown(
     id='world_regions_drop',
     options=world_regions,
-    value=['Europe', 'Africa', 'Americas', 'Asia & Oceania', 'Middle East'],
+    value=['Europe', 'Africa', 'Americas'],  # , 'Africa', 'Americas'],
     multi=True  # Start with multiple = True
 )
 
 dropdown_types_of_conflicts = dcc.Dropdown(
     id='types_of_conflicts_drop',
     options=types_of_conflicts,
-    value='civil conflicts',
+    value=['civil conflicts'],
     multi=False  # Start with multiple = False
 )
 
@@ -169,24 +173,25 @@ app.layout = html.Div([
                 html.Div([  # Instructions for the filters
                     html.Br(),
                     html.Label('Choose the world regions you want to examine and also the type of conflict'),
-                ], style={'width': '250px', 'padding-left': '15px'}),
+                ], style={'width': '250px', 'padding-left': '20px'}),
 
                 html.Div([  # dropdown Country Choice
                     html.Br(),
                     html.Label('World Region Choice'),
                     dropdown_world_regions,
-                ], style={'width': '53%', 'padding-left': '15px'}),
+                ], style={'width': '45%', 'padding-left': '20px'}),
 
                 html.Div([  # dropdown type of conflict
                     html.Br(),
                     html.Label('Type of Conflict Choice'),
                     dropdown_types_of_conflicts,
-                ], style={'width': '20%', 'padding-left': '15px'}),
+                ], style={'width': '20%', 'padding-left': '20px'}),
 
             ], style={'display': 'flex', 'height': '10%', 'padding-left': '200px'}),
 
             ##############################################################
             html.Div([  # second part --> range slider (10%)
+                html.Br(),
                 html.Br(),
                 range_slider,
             ], style={'height': '10%', 'width': '75%', 'padding-left': '250px'}),  # , 'padding-bottom': '10px'}),
@@ -200,13 +205,13 @@ app.layout = html.Div([
                 html.Br(),
                 html.Br(),
                 dcc.Graph(id='line_chart', className="box"),
-            ], style={'width': '60%'}),
+            ], style={'width': '55%'}),
 
             html.Div([  # line chart on the left
                 html.Br(),
                 html.Br(),
                 dcc.Graph(id='bar_chart', className="box"),
-            ], style={'width': '50%'}),
+            ], style={'width': '45%'}),
 
         ], style={'display': 'flex', 'height': '40%', 'padding-left': '195px'}),
 
@@ -263,37 +268,20 @@ def plots(region, years, conflict):
                                  y=df_line_graph.loc[world_region],
                                  name=world_region,
                                  line=dict(color=colors[i]),
-                                 showlegend=True
+                                 # font-size='10px', ????????
                                  )
                             )
 
-    # layout_scatter = dict(title=dict(text='Total number of conflicts over the years', x=0.5, y=0.95),
-    #                       xaxis=dict(title='Years'),
-    #                       yaxis=dict(title='Total Number of Conflicts'),
-    #                       # margin=go.layout.Margin(
-    #                       #     l=0,  # left margin
-    #                       #     r=0,  # right margin
-    #                       #     b=0,  # bottom margin
-    #                       #     t=0,  # top margin
-    #                       # )
-    #                       )
-    layout_scatter = go.Layout(
-        margin=go.layout.Margin(
-            l=45,  # left margin
-            r=5,  # right margin
-            b=45,  # bottom margin
-            t=50,  # top margin,
-        ),
-        title=go.layout.Title(text='Total number of conflicts over the years', x=0.5, y=0.95),
-        xaxis=go.layout.XAxis(title='Years'),
-        yaxis=go.layout.YAxis(title='Total Number of Conflicts'),
-    )
+    layout_scatter = dict(title=dict(text='Total number of conflicts over the years', x=0.5),
+                          xaxis=dict(title='Years'),
+                          yaxis=dict(title='Total Number of Conflicts'))
 
     ########################################################################################
     # Second Visualization: Bar Charts
+    conflicts_string = "".join(conflict)
     df_bar_graph = filter_df.loc[filter_df['world_region'].isin(region)]
-    df_bar_graph = pd.pivot_table(df_bar_graph[['world_region', 'year', conflict]],
-                                  values=conflict, index=['world_region'], columns=['year'])
+    df_bar_graph = pd.pivot_table(df_bar_graph[['world_region', 'year', conflicts_string]],
+                                  values=conflicts_string, index=['world_region'], columns=['year'])
 
     fig_bar_data = []
     # Each year defines a new hidden (implies visible=False) trace in our visualization
@@ -306,54 +294,27 @@ def plots(region, years, conflict):
                                            showlegend=False
                                            ),
                                  # visible=False,
-                                 layout=go.Layout(dict(title_text=f'Number of {conflict} in {str(year)}'))
+                                 layout=go.Layout(dict(title_text=f'Number of {conflicts_string} in {str(year)}'))
                                  ))
 
-    # fig_bar_layout = go.Layout(
-    #     margin=go.layout.Margin(
-    #         l=45,  # left margin
-    #         r=5,  # right margin
-    #         b=45,  # bottom margin
-    #         t=50,  # top margin,
-    #     ),
-    #     title=go.layout.Title(text=f'Total Number of {conflict} between {str(years[0])} and {str(years[1])}'),
-    #     yaxis=go.layout.YAxis(title='Number of Conflicts', range=[0, 10]),
-    #     # change the range !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #     updatemenus=go.layout.Updatemenu(type="buttons",
-    #                                      buttons=[go.layout.updatemenu.Button(label="Play",
-    #                                                                           method="animate",
-    #                                                                           args=[None]),
-    #                                               go.layout.updatemenu.Button(label='Pause',
-    #                                                                           method="animate",
-    #                                                                           args=[[None], dict(
-    #                                                                               frame=dict(duration=0, redraw=False),
-    #                                                                               # pause button to stop and continue !!!!!!!
-    #                                                                               mode="immediate",
-    #                                                                               transition=dict(duration=0))])
-    #                                               ],
-    #                                      direction='left',  # put both of the buttons side by side
-    #                                      x=0.65,  # change position of the buttons
-    #                                      y=1.15)
-    # )
-
-    fig_bar_layout = dict(title=dict(text=f'Total Number of {conflict} between {str(years[0])} and {str(years[1])}'),
-                          yaxis=dict(title='Number of Conflicts', range=[0, 10]),
-                          # change the range !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                          # PLAT BUTTON TO SEE CHANGES THROUGHOUT THE YEARS
-                          updatemenus=[dict(type="buttons",
-                                            buttons=[dict(label="Play",
-                                                          method="animate",
-                                                          args=[None]),
-                                                     dict(label='Pause',
-                                                          method="animate",
-                                                          args=[[None], dict(frame=dict(duration=0, redraw=False),
-                                                                             # pause button to stop and continue !!!!!!!
-                                                                             mode="immediate",
-                                                                             transition=dict(duration=0))])
-                                                     ],
-                                            direction='left',  # put both of the buttons side by side
-                                            x=0.65,  # change position of the buttons
-                                            y=1.15)])
+    fig_bar_layout = dict(
+        title=dict(text=f'Total Number of {conflicts_string} between {str(years[0])} and {str(years[1])}'),
+        yaxis=dict(title='Number of Conflicts', range=[0, 10]),  # change the range !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # PLAT BUTTON TO SEE CHANGES THROUGHOUT THE YEARS
+        updatemenus=[dict(type="buttons",
+                          buttons=[dict(label="Play",
+                                        method="animate",
+                                        args=[None]),
+                                   dict(label='Pause',
+                                        method="animate",
+                                        args=[[None], dict(frame=dict(duration=0, redraw=False),
+                                                           # pause button to stop and continue !!!!!!!
+                                                           mode="immediate",
+                                                           transition=dict(duration=0))])
+                                   ],
+                          direction='left',  # put both of the buttons side by side
+                          x=0.6,  # change position of the buttons
+                          y=-0.1)])
 
     initial_data = dict(type='bar',
                         x=df_bar_graph.index,
