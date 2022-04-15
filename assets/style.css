@@ -15,20 +15,21 @@ body {
 }
 
 .box {
-  border-radius: 5px;
+  border-radius: 8px;
   background-color: #d3ccc3 ;
-  margin: 2px;
-  padding: 2px;
+  margin: 3px;
+  padding: 3px;
   box-shadow: 3px 3px 3px lightgrey;
 }
 
-.box_emissions{
+.box_filters{
   border-radius: 20px;
-  background-color: #d3ccc3 ;
-  margin: 2px;
-  box-shadow: 2px 2px 2px lightgrey;
-  justify-content: center;
-  width: 50%;
+  align: right;
+  background-color: #d3ccc3;
+  margin-left: 150px;
+  margin-right: 10px;
+  box-shadow: 4px 4px 4px lightgrey;
+  justify-content: right;
   text-align: center;
 }
 

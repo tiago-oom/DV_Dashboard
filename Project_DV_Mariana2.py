@@ -1,6 +1,6 @@
 import dash
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import dcc
+from dash import html
 from dash.dependencies import Input, Output, State
 import numpy as np
 import pandas as pd
@@ -13,7 +13,7 @@ import plotly.graph_objs as go
 #########################################
 # Dataset types of conflicts
 df_conflicts = pd.read_csv(  # Change this to the path of your computer
-    "C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Github/CSVs/types_of_conflicts.csv")
+    r"C:\Users\Administrador\OneDrive - NOVAIMS\Mestrado\Data Visualization\Project\CSVs\types_of_conflicts.csv")
 
 df_conflicts.drop(columns=['Code'], inplace=True)  # drop the column 'Code' --> not necessary for our analysis
 
@@ -30,10 +30,17 @@ df_conflicts['total number of conflicts'] = df_conflicts['civil-foreign conflict
                                             df_conflicts['between states conflicts'] + df_conflicts[
                                                 'colonial/imperial conflicts']
 
+colors = ['#B6E880', '#FF97FF', '#FECB52', '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692']
+
+#############################################
+# Dataset for bar chart
+# df_conflicts2 = df_conflicts.loc[df_conflicts['world_region'] != 'World']
+# df_conflicts2 = df_conflicts.loc[df_conflicts['year'] > 2000]  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 #############################################
 # Dataset for world deaths
 df_deaths = pd.read_csv(
-    "C:/Users/tsoom/OneDrive/Documentos/IMS - Data Science/2º Semester/Data Visualization/Github/CSVs/deaths-from-conflict-and-terrorism.csv")
+    r"C:\Users\Administrador\OneDrive - NOVAIMS\Mestrado\Data Visualization\Project\CSVs\deaths-from-conflict-and-terrorism.csv")
 df_deaths.drop(columns=['Code'], inplace=True)
 df_deaths.rename(columns={'Entity': 'Country',
                           'Year': 'year',
@@ -42,29 +49,22 @@ df_deaths.rename(columns={'Entity': 'Country',
 
 df_deaths['Country'] = df_deaths['Country'].astype('string')
 
-regions = ['World', 'Eastern Mediterranean Region', 'North Africa and Middle East', 'Low SDI',
-           'Middle East & North Africa',
-           'Eastern Mediterranean Region', 'World Bank Lower Middle Income', 'Middle SDI',
-           'South Asia - World Bank region',
+regions = ['World', 'Eastern Mediterranean Region', 'North Africa and Middle East', 'Low SDI', 'Middle East & North Africa',
+           'Eastern Mediterranean Region', 'World Bank Lower Middle Income', 'Middle SDI', 'South Asia - World Bank region',
            'African Union', 'Sub-Saharan Africa - World Bank region', 'Europe & Central Asia - World Bank region',
            'European Region', 'Low-middle SDI', 'World Bank Low Income', 'High-income Asia Pacific', 'African Region',
-           'World Bank High Income', 'World Bank Upper Middle Income', 'Western Pacific Region',
-           'Western sub-Saharan Africa',
+           'World Bank High Income', 'World Bank Upper Middle Income', 'Western Pacific Region', 'Western sub-Saharan Africa',
            'Western Europe', 'South-East Asia Region', 'Commonwealth Middle Income', 'Commonwealth', 'High-middle SDI',
            'Southeast Asia, East Asia, and Oceania', 'Southeast Asia', 'Eastern sub-Saharan Africa', 'G20', 'Europe',
-           'Africa', 'Asia', 'Central Europe, Eastern Europe, and Central Asia', 'Central Europe',
-           'Region of the Americas',
+           'Africa', 'Asia', 'Central Europe, Eastern Europe, and Central Asia', 'Central Europe', 'Region of the Americas',
            'Central Asia', 'Central sub-Saharan Africa', 'OECD Countries', 'Commonwealth Low Income', 'Eastern Europe',
-           'High-income', 'America', 'Latin America & Caribbean - World Bank region',
-           'East Asia & Pacific - World Bank region',
+           'High-income', 'America', 'Latin America & Caribbean - World Bank region', 'East Asia & Pacific - World Bank region',
            'High SDI', 'High-income North America', 'North America']
 
 deaths = df_deaths[~df_deaths.Country.isin(regions)]
 
-deaths_df = pd.pivot_table(deaths, values='Total Deaths', index='Country', columns='year')
+deaths_df = pd.pivot_table(deaths, values = 'Total Deaths', index = 'Country', columns = 'year')
 
-#######################################
-colors = ['#B6E880', '#FF97FF', '#FECB52', '#636EFA', '#EF553B', '#00CC96', '#AB63FA', '#FFA15A', '#19D3F3', '#FF6692']
 
 #######################################
 # Interactive Components
@@ -79,14 +79,14 @@ types_of_conflicts = [dict(label=conflict, value=conflict) for conflict in list_
 dropdown_world_regions = dcc.Dropdown(
     id='world_regions_drop',
     options=world_regions,
-    value=['Europe', 'Africa', 'Americas', 'Asia & Oceania', 'Middle East'],
+    value=['Europe', 'Africa', 'Americas'],  # , 'Africa', 'Americas'],
     multi=True  # Start with multiple = True
 )
 
 dropdown_types_of_conflicts = dcc.Dropdown(
     id='types_of_conflicts_drop',
     options=types_of_conflicts,
-    value='civil conflicts',
+    value=['civil conflicts'],
     multi=False  # Start with multiple = False
 )
 
@@ -94,7 +94,7 @@ range_slider = dcc.RangeSlider(  # create a slider for the years
     id='range_slider',
     min=1950,
     max=2020,
-    value=[1990, 2020],
+    value=[1960, 2010],
     marks={'1950': 'Year 1950',
            '1960': 'Year 1960',
            '1970': 'Year 1970',
@@ -103,7 +103,6 @@ range_slider = dcc.RangeSlider(  # create a slider for the years
            '2000': 'Year 2000',
            '2010': 'Year 2010',
            '2020': 'Year 2020'},
-    tooltip={"placement": "bottom", "always_visible": False},
     step=1
 )
 
@@ -125,7 +124,7 @@ normal_slider = dcc.Slider(
     min=df_deaths['year'].min(),
     max=df_deaths['year'].max(),
     marks={str(i): '{}'.format(str(i)) for i in
-           [1990, 1995, 2000, 2005, 2010, 2015, 2019]},
+           [1990, 1995, 2000, 2005, 2010, 2014]},
     value=df_deaths['year'].min(),
     step=1
 )
@@ -154,7 +153,7 @@ app.layout = html.Div([
         html.Br(),
         html.Label('Text......................'),
         html.Br(),
-        # html.Img(src=app.get_asset_url('war_soldier.jpg')),
+        # html.Img()
         html.Br(),
         html.Label('Work done by......................'),
 
@@ -169,31 +168,31 @@ app.layout = html.Div([
 
                 html.Div([  # Instructions for the filters
                     html.Br(),
-                    html.Label(
-                        'Choose the world regions you want to examine and also the type of conflict, and the years to focus on.....'),
-                ], style={'width': '240px', 'padding-left': '20px'}),
+                    html.Label('Choose the world regions you want to examine and also the type of conflict'),
+                ], style={'width': '250px', 'padding-left': '20px'}),
 
                 html.Div([  # dropdown Country Choice
                     html.Br(),
                     html.Label('World Region Choice'),
                     dropdown_world_regions,
-                ], style={'width': '53%', 'padding-left': '15px'}),
+                ], style={'width': '45%', 'padding-left': '20px'}),
 
                 html.Div([  # dropdown type of conflict
                     html.Br(),
                     html.Label('Type of Conflict Choice'),
                     dropdown_types_of_conflicts,
-                ], style={'width': '20%', 'padding-left': '15px', 'padding-right': '5px'}),
+                ], style={'width': '20%', 'padding-left': '20px'}),
 
-            ], style={'display': 'flex', 'height': '10%'}),
+            ], style={'display': 'flex', 'height': '10%', 'padding-left': '200px'}),
 
             ##############################################################
             html.Div([  # second part --> range slider (10%)
                 html.Br(),
+                html.Br(),
                 range_slider,
-            ], style={'height': '10%', 'width': '85%', 'padding-left': '90px'}),  # , 'padding-bottom': '10px'}),
+            ], style={'height': '10%', 'width': '75%', 'padding-left': '250px'}),  # , 'padding-bottom': '10px'}),
 
-        ], style={'width': '88%'}, className='box_filters'),
+        ]),  # className='box'),
 
         ####################################################################
         html.Div([  # third part --> line chart and bar chart
@@ -202,51 +201,39 @@ app.layout = html.Div([
                 html.Br(),
                 html.Br(),
                 dcc.Graph(id='line_chart', className="box"),
-            ], style={'width': '65%'}),
+            ], style={'width': '55%'}),
 
-            html.Div([  # bar chart on the right
+            html.Div([  # line chart on the left
                 html.Br(),
                 html.Br(),
-                # html.H4('Total number of'),
                 dcc.Graph(id='bar_chart', className="box"),
-            ], style={'width': '40%'}),
+            ], style={'width': '45%'}),
 
-        ], style={'display': 'flex', 'height': '35%', 'padding-left': '145px'}),
-        # pôr este gráfico um pouco menos alto !!!!!!!!!!!!!!
+        ], style={'display': 'flex', 'height': '40%', 'padding-left': '195px'}),
 
-        ####################################################################
-        html.Br(),
-        html.Div([
-            html.Label('Now let´s take a look at the number of deaths due to all this conflicts since 1990 until 2019... \
-            Choose the layout of yeh map that you prefer...'),
-        ], style={'padding-left': '10px', 'margin-left': '155px', 'border-radius': '8px',
-                  'background-color': '#d3ccc3'}),
-        html.Br(),
 
         ####################################################################
         html.Div([  # fourth part --> world map and top_countries graph
 
             html.Div([  # map on the left
-
-                html.Div([
-                    radio_projection,
-                ], className='box', style={'padding-left': '250px'}),
+                radio_projection,
                 dcc.Graph(id='world_map'),
-                html.Br(),
-                html.Div([  # fifth part --> normal slider (10%)
-                    normal_slider,
-                    html.Br(),
-                ], style={'height': '10%', 'width': '90%', 'padding-left': '40px'}),
-            ], className="box", style={'width': '70%'}),
+            ], className="box", style={'width': '65%', 'padding-left': '20px'}),
 
-            html.Div([  # top_countries on the right
-                dcc.Graph(id='top_countries_graph', className="box"),
-            ], style={'width': '35%', 'height': '150%'}),
+           html.Div([  # line chart on the left
+               dcc.Graph(id='top_countries_graph', className="box"),
+           ], style={'width': '35%'}),
 
-        ], style={'display': 'flex', 'height': '40%', 'padding-left': '145px'}),
+        ], style={'display': 'flex', 'height': '35%', 'padding-left': '195px'}),
+
+        ####################################################################
+        html.Div([  # fifth part --> normal slider (10%)
+            html.Br(),
+            html.Br(),
+            normal_slider,
+        ], style={'height': '10%', 'width': '90%', 'padding-left': '250px'}),  # , 'padding-bottom': '10px'}),
 
     ], style={'display': 'inline-block', 'height': '65%', 'width': '95%', 'padding-left': '50px'}),
-
 ])
 
 
@@ -284,29 +271,20 @@ def plots(region, years, conflict):
                                  y=df_line_graph.loc[world_region],
                                  name=world_region,
                                  line=dict(color=colors[i]),
-                                 showlegend=True
+                                 # font-size='10px', ????????
                                  )
                             )
 
-    layout_scatter = go.Layout(
-        plot_bgcolor='#ecebe9',
-        # grid=go.layout.Grid(columns=10),
-        margin=go.layout.Margin(
-            l=45,  # left margin
-            r=5,  # right margin
-            b=10,  # bottom margin
-            t=50,  # top margin,
-        ),
-        title=go.layout.Title(text='Total number of conflicts over the years', x=0.42, y=0.95),
-        xaxis=go.layout.XAxis(title='Years'),
-        yaxis=go.layout.YAxis(title='Total Number of Conflicts'),
-    )
+    layout_scatter = dict(title=dict(text='Total number of conflicts over the years', x=0.5),
+                          xaxis=dict(title='Years'),
+                          yaxis=dict(title='Total Number of Conflicts'))
 
     ########################################################################################
     # Second Visualization: Bar Charts
+    conflicts_string = "".join(conflict)
     df_bar_graph = filter_df.loc[filter_df['world_region'].isin(region)]
-    df_bar_graph = pd.pivot_table(df_bar_graph[['world_region', 'year', conflict]],
-                                  values=conflict, index=['world_region'], columns=['year'])
+    df_bar_graph = pd.pivot_table(df_bar_graph[['world_region', 'year', conflicts_string]],
+                                  values=conflicts_string, index=['world_region'], columns=['year'])
 
     fig_bar_data = []
     # Each year defines a new hidden (implies visible=False) trace in our visualization
@@ -319,59 +297,27 @@ def plots(region, years, conflict):
                                            showlegend=False
                                            ),
                                  # visible=False,
-                                 layout=go.Layout(dict(title_text=f'Number of {conflict} in {str(year)}'))
+                                 layout=go.Layout(dict(title_text=f'Number of {conflicts_string} in {str(year)}'))
                                  ))
 
-    # fig_bar_layout = go.Layout(
-    #     plot_bgcolor='#ecebe9',
-    #     margin=go.layout.Margin(
-    #         l=45,  # left margin
-    #         r=5,  # right margin
-    #         b=45,  # bottom margin
-    #         t=50,  # top margin,
-    #     ),
-    #     title=go.layout.Title(text=f'Total Number of {conflict} between {str(years[0])} and {str(years[1])}'),
-    #     yaxis=go.layout.YAxis(title='Number of Conflicts', range=[0, 10]),
-    #     # change the range !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    #     updatemenus=(go.layout.Updatemenu(type="buttons",
-    #                                       buttons=[go.layout.updatemenu.Button(label="Play",
-    #                                                                            method="animate",
-    #                                                                            args=[None]),
-    #                                                go.layout.updatemenu.Button(label='Pause',
-    #                                                                            method="animate",
-    #                                                                            args=[None])
-    #                                                # {'frame': {'duration': 0,
-    #                                                #                    'redraw': False},
-    #                                                #          # pause button to stop and continue !!!!!!!
-    #                                                #          'mode': "immediate",
-    #                                                #          'transition': {
-    #                                                #              'duration': 0}}])
-    #                                                ],
-    #                                       direction='left',  # put both of the buttons side by side
-    #                                       x=0.65,  # change position of the buttons
-    #                                       y=1.15)
-    #                  )
-    # )
-
-    fig_bar_layout = dict(plot_bgcolor='#ecebe9',
-                          title=dict(text=f'Number of {conflict} ({str(years[0])}-{str(years[1])})'),
-                          yaxis=dict(title='Number of Conflicts', range=[0, 10]),
-                          # change the range !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                          # PLAT BUTTON TO SEE CHANGES THROUGHOUT THE YEARS
-                          updatemenus=[dict(type="buttons",
-                                            buttons=[dict(label="Play",
-                                                          method="animate",
-                                                          args=[None]),
-                                                     dict(label='Pause',
-                                                          method="animate",
-                                                          args=[[None], dict(frame=dict(duration=0, redraw=False),
-                                                                             # pause button to stop and continue !!!!!!!
-                                                                             mode="immediate",
-                                                                             transition=dict(duration=0))])
-                                                     ],
-                                            direction='left',  # put both of the buttons side by side
-                                            x=0.65,  # change position of the buttons
-                                            y=1.15)])
+    fig_bar_layout = dict(
+        title=dict(text=f'Total Number of {conflicts_string} between {str(years[0])} and {str(years[1])}'),
+        yaxis=dict(title='Number of Conflicts', range=[0, 10]),  # change the range !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        # PLAT BUTTON TO SEE CHANGES THROUGHOUT THE YEARS
+        updatemenus=[dict(type="buttons",
+                          buttons=[dict(label="Play",
+                                        method="animate",
+                                        args=[None]),
+                                   dict(label='Pause',
+                                        method="animate",
+                                        args=[[None], dict(frame=dict(duration=0, redraw=False),
+                                                           # pause button to stop and continue !!!!!!!
+                                                           mode="immediate",
+                                                           transition=dict(duration=0))])
+                                   ],
+                          direction='left',  # put both of the buttons side by side
+                          x=0.6,  # change position of the buttons
+                          y=-0.1)])
 
     initial_data = dict(type='bar',
                         x=df_bar_graph.index,
@@ -387,10 +333,10 @@ def plots(region, years, conflict):
 #######################################
 # Second Callback
 @app.callback(
-    [
+    # [
         Output("world_map", "figure"),
         Output("top_countries_graph", "figure"),
-    ],
+    # ],
     [
         Input("projection", "value"),
         Input('normal_slider', 'value')
@@ -409,26 +355,22 @@ def plots(projection, year):
                            locationmode='country names',
                            z=np.log(filter_df2['Total Deaths']),
                            text=filter_df2.index,
-                           colorscale='Viridis',  # change the color scale !!!!!!!!!!!!!!!!!!!!!!!!!
-                           reversescale=True,
+                           colorscale='inferno'
                            )
 
     layout_choropleth = dict(geo=dict(scope='world',  # default
                                       projection=dict(type=['equirectangular', 'orthographic'][projection]),
                                       # showland=True,   # default = True
-                                      landcolor='white',
-                                      lakecolor='blue',
+                                      landcolor='black',
+                                      lakecolor='white',
                                       showocean=True,  # default = False
                                       oceancolor='azure'
                                       ),
 
                              title=dict(text='Total deaths by conflicts or terrorism',
-                                        x=.5,
-                                        y=0.93  # Title relative position according to the xaxis, range (0,1)
-                                        ),
-                             margin=dict(l=20, r=20, t=10, b=5)
+                                        x=.5  # Title relative position according to the xaxis, range (0,1)
+                                        )
                              )
-
     #######################################################################################
     # Fourth Visualization: Bar Chart 2
     fig_bar_data2 = []
@@ -436,18 +378,18 @@ def plots(projection, year):
     # Each year defines a new hidden (implies visible=False) trace in our visualization
     for year in deaths_df.columns:  # year is an integer number
         fig_bar_data2.append(dict(data=dict(type='bar',
-                                            x=deaths_df.sort_values(by=year, ascending=False).iloc[:5, :].index,
-                                            # countries
-                                            y=deaths_df.sort_values(by=year, ascending=False).iloc[:5, :][year],
-                                            # values for that year
-                                            name=year,
-                                            marker=dict(color='#9F9F5F'),
-                                            showlegend=False
-                                            ),
-                                  # visible=False,
-                                  layout=go.Layout(
-                                      dict(title_text=f'Countries with the highest number of deaths in {str(year)}'))
-                                  ))
+                                           x=deaths_df.sort_values(by=year, ascending=False).iloc[:5, :].index,
+                                           # countries
+                                           y=deaths_df.sort_values(by=year, ascending=False).iloc[:5, :][year],
+                                           # values for that year
+                                           name=year,
+                                           marker=dict(color='#9F9F5F'),
+                                           showlegend=False
+                                           ),
+                                 # visible=False,
+                                 layout=go.Layout(
+                                     dict(title_text=f'Countries with the highest number of deaths in {str(year)}'))
+                                 ))
 
     fig_bar_layout2 = dict(
         title=dict(text=f'Countries with the highest number of deaths'),
@@ -455,11 +397,11 @@ def plots(projection, year):
     )
 
     initial_data2 = dict(type='bar',
-                         x=deaths_df.sort_values(by=year, ascending=False).iloc[:5, :].index,
-                         y=deaths_df.sort_values(by=year, ascending=False).iloc[:5, :][2000],
-                         marker=dict(color='orange'),
-                         name=str(1990)
-                         )
+                        x=deaths_df.sort_values(by=year, ascending=False).iloc[:5, :].index,
+                        y=deaths_df.sort_values(by=year, ascending=False).iloc[:5, :][2000],
+                        marker=dict(color='orange'),
+                        name=str(1990)
+                        )
 
     return go.Figure(data=data_choropleth, layout=layout_choropleth), \
            go.Figure(data=initial_data2, layout=fig_bar_layout2, frames=fig_bar_data2)
