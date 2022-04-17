@@ -1,5 +1,13 @@
 body {
-    background-color: #FFFFFF ;
+    background-color: #FFFFFF;
+    font-family:tahoma;
+}
+
+.main {
+    font-size: 15px;
+    padding: 0 10px;
+    padding-left: 12%;
+    color: #363535;
 }
 
 .side_bar {
@@ -8,34 +16,132 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  background-color: #d3ccc3 ;
+  background-color: #9F9F5F ;
   padding-left: 1%;
   padding-right: 1%;
   color:rgb(7, 7, 7);
 }
 
-.box {
-  border-radius: 8px;
-  background-color: #d3ccc3 ;
-  margin: 3px;
-  padding: 3px;
-  box-shadow: 3px 3px 3px lightgrey;
+h1 {
+  text-align: center;
+  color: #edefeb;
+  font-family:tahoma;
 }
+
+.box {
+  border-radius: 15px;
+  background-color: #F5F5DC;
+  margin-top: 15px;
+  margin-left: 5px;
+  margin-right: 5px;
+  padding: 10px;
+  text-align: center;
+  }
+
+.card {
+  border-radius: 15px;
+  background-color: white;
+  margin-top: 15px;
+  margin-left: 5px;
+  margin-right: 5px;
+  padding: 10px;
+  text-align: center;
+
+  }
 
 .box_filters{
   border-radius: 20px;
   align: right;
-  background-color: #d3ccc3;
-  margin-left: 150px;
+  background-color: #DFDFB1;
+  margin-left: 85px;
   margin-right: 10px;
-  box-shadow: 4px 4px 4px lightgrey;
+  margin-top: 3px;
+  box-shadow: 4px 4px 4px #BFBF88;
   justify-content: right;
   text-align: center;
 }
 
-h1, h2, h3, h4, h5, h6 {
+.dash-dropdown {
+  border-radius:20px;
+  background-color:#DFDFB1;
+  margin:3px;
+  padding:5px;
+  font-size:small;
+}
+
+/* Drop down */
+#types_of_conflicts_drop .VirtualizedSelectFocusedOption {
+  background-color:#F5F5DC;
+}
+
+#world_regions_drop .VirtualizedSelectFocusedOption {
+  background-color:#F5F5DC;
+}
+
+#world_regions_drop .Select--multi .Select-value {
+  background-color: #F5F5DC;
+  border-color: #9F9F5F;
+  color:  black;
+}
+
+.year_slider {
+  border-radius:20px;
+  margin-bottom:15px;
+  padding:15px;
+  font-size:small;
+}
+
+.year_slider2 {
+  border-radius:20px;
+  font-size:small;
+  padding-bottom:15px;
+
+}
+
+
+/* Mouse-over effects */
+.year_slider:hover {
+  opacity: 1; /* Fully shown on mouse-over */
+}
+
+/* The slider handle (use -webkit- (Chrome, Opera, Safari, Edge) and -moz- (Firefox) to override default look) */
+.year_slider::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  width: 25px; /* Set a specific slider handle width */
+  height: 25px; /* Slider handle height */
+  background: #04AA6D; /* Green background */
+  cursor: pointer; /* Cursor on hover */
+}
+
+.text {
+  margin:2px;
+  padding:2px;
+  align-self:center;
+  font-size: 13px
+}
+
+.text2 {
+  margin:5px;
+  padding:5px;
+  align-self:center
+  background-color:#DFDFB1
+}
+
+.text_comments{
+    padding-left: 10px;
+    margin-left: 85px;
+    margin-top: 15px;
+    border-radius: 15px;
+    padding: 10px;
+    background-color: #DFDFB1;
+    font-size: 13px
+}
+
+h2, h3, h4, h5, h6 {
   text-align: center;
-  background-color: #d3ccc3 ;
+  background-color: #9F9F5F ;
+  font-size:smaller;
 }
 
 .examples {
@@ -68,8 +174,32 @@ button {
   margin-left: 70px;
   }
 
+
 @media (max-width: 900px) {
   .row {
     display: block;
   }
 }
+
+.radio label:hover {
+  background-color:#e1e2df;
+  border:2px solid #e1e2df
+}
+
+*::-webkit-scrollbar {
+   width:12px
+}
+
+*::-webkit-scrollbar-track {
+   background:white
+}
+
+*::-webkit-scrollbar-thumb {
+   background-color:#9F9F5F;
+   border-radius:20px;
+   border:3px solid #edefeb;
+}
+
+
+
+
